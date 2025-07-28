@@ -1,7 +1,7 @@
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs } from 'expo-router';
-import { Home } from 'lucide-react-native';
+import { BookIcon, FolderDotIcon, Home } from 'lucide-react-native';
 import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -86,20 +86,20 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <Home size={24} color={color} />,
           }}
         />
-        {/* <Tabs.Screen
-          name="center"
+         <Tabs.Screen
+          name="doctor-details"
           options={{
-            title: 'Transfer',
-            tabBarIcon: ({ color }) => <Repeat size={28} color="#fff" />,
+            title: 'Details',
+            tabBarIcon: ({ color }) => <FolderDotIcon size={28} color="#fff" />,
           }}
         />
         <Tabs.Screen
-          name="settings"
+          name="appointmentbooking"
           options={{
-            title: 'Profile',
-            tabBarIcon: ({ color }) => <User size={24} color={color} />,
+            title: 'Appointment Booking',
+            tabBarIcon: ({ color }) => <BookIcon size={24} color={color} />,
           }}
-        /> */}
+        /> 
       </Tabs>
     </SafeAreaProvider>
   );

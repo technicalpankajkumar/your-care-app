@@ -196,7 +196,7 @@ export default function IndexScreen() {
 
     return (
          <SafeAreaView className="flex-1 bg-white" edges={["top", "bottom"]}>
-            <LinearGradient colors={['#667eea', '#764ba2']} className="flex-1">
+            <LinearGradient colors={['#3B82F6', '#1D4ED8']} className="flex-1">
                 <View className="flex-row justify-between items-center px-5 py-3">
                     <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}>
                         <Menu size={24} color="#FFFFFF" />
