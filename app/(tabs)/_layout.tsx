@@ -1,52 +1,52 @@
+import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Tabs } from 'expo-router';
-import { Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Home } from 'lucide-react-native';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-// Use NativeWind classes if working, else fallback to style
 function TabBarBackground() {
   return (
-    <LinearGradient
-      colors={['#667eea', '#1D4ED8']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        // height: 88,
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        shadowColor: "#000",
-        shadowOpacity: 0.12,
-        shadowRadius: 16,
-        elevation: 8,
-      }}
-    >
-      {/* Optional: Add a subtle overlay for glass effect */}
-      <View className="absolute inset-0 bg-white/10 rounded-t-2xl" />
-    </LinearGradient>
+    <View style={StyleSheet.absoluteFill}>
+      <LinearGradient
+        colors={['#3B82F6', '#1D4ED8']}
+        style={{
+          flex: 1,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+        }}
+      />
+    </View>
   );
 }
 
-import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { IconSymbol } from 'app-example/components/ui/IconSymbol';
-import { LinearGradient } from 'expo-linear-gradient';
+function AnimatedBubbleTab({ children, onPress, accessibilityState }: BottomTabBarButtonProps) {
+  const isFocused = accessibilityState?.selected;
+  const scale = useSharedValue(isFocused ? 1.1 : 1);
 
-function HapticTab({
-  children,
-  onPress,
-  accessibilityState,
-  ...props
-}: BottomTabBarButtonProps) {
-  const isSelected = accessibilityState?.selected;
+  scale.value = withTiming(isFocused ? 1.1 : 1, { duration: 250 });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  if (isFocused) {
+    return (
+      <Animated.View style={[styles.centerTab, animatedStyle]}>
+        <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={styles.bubble}>
+          {children}
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
-      className={`flex-1 items-center justify-center ${isSelected ? "bg-blue-100 dark:bg-blue-900" : ""}`}
-      {...props}
-    >
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       {children}
     </TouchableOpacity>
   );
@@ -56,56 +56,86 @@ export default function TabLayout() {
   return (
     <SafeAreaProvider>
       <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: "#ffffff",
+        screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarButton: HapticTab,
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: '#1D4ED8',
+          tabBarInactiveTintColor: '#9CA3AF',
           tabBarBackground: TabBarBackground,
-          tabBarLabelStyle: {
-            fontSize: 13,
-            fontWeight: "600",
+          tabBarStyle: {
+            position: 'absolute',
+            height: 75,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            backgroundColor: '#ffffff',
+            ...styles.shadow,
           },
-          tabBarStyle: Platform.select({
-            ios: {
-              position: 'absolute',
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              height: 64,
-              backgroundColor: "#fff",
-              shadowColor: "#000",
-              shadowOpacity: 0.08,
-              shadowRadius: 12,
-            },
-            default: {
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              height: 64,
-              backgroundColor: "#fff",
-              elevation: 8,
-            },
-          }),
-        }}
+          tabBarButton: (props) => {
+            if (route.name === 'index') {
+              return <AnimatedBubbleTab {...props} />;
+            }
+            return <TouchableOpacity {...props} style={{ flex: 1 }} />;
+          },
+        }
+      )}
       >
         <Tabs.Screen
           name="index"
           options={{
             title: 'Home',
-            tabBarIcon: ({ color, focused }) => (
-              <IconSymbol
-                size={28}
-                name="house.fill"
-                color={focused ? "#2563eb" : "#6b7280"}
-              />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <Text className={focused ? "text-blue-600" : "text-gray-500"}>
-                Home
-              </Text>
-            ),
+            tabBarIcon: ({ color }) => <Home size={24} color={color} />,
           }}
         />
-        {/* Add more Tabs.Screen for other tabs here */}
+        {/* <Tabs.Screen
+          name="center"
+          options={{
+            title: 'Transfer',
+            tabBarIcon: ({ color }) => <Repeat size={28} color="#fff" />,
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ color }) => <User size={24} color={color} />,
+          }}
+        /> */}
       </Tabs>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  bubble: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#1D4ED8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centerTab: {
+    position: 'absolute',
+    top: -32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      android: {
+        elevation: 10,
+      },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+      },
+    }),
+  },
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 10,
+  },
+});
